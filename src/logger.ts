@@ -1,8 +1,19 @@
+import { AsyncLocalStorage } from 'async_hooks';
+import { randomBytes } from 'crypto';
+
 import { LoggerService as LoggerServiceInterface } from '@nestjs/common';
 import Pino, { Logger, destination, Level, LoggerOptions } from 'pino';
 import { PrettyOptions } from 'pino-pretty';
 
 import config from '~/config';
+import * as process from 'process';
+
+const asyncLocalStorage = new AsyncLocalStorage<string>();
+export function setTraceId(requestId?: string) {
+  const traceId = requestId || randomBytes(16).toString('hex');
+  asyncLocalStorage.enterWith(traceId);
+  return traceId;
+}
 
 const prettyConfig: PrettyOptions = {
   colorize: true,
@@ -19,6 +30,7 @@ const options: LoggerOptions = {
       version: config.version,
     },
   },
+  mixin: () => ({ traceId: asyncLocalStorage.getStore() }),
   redact: {
     paths: ['pid', 'hostname', 'body.password'],
     remove: true,

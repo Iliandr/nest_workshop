@@ -5,16 +5,18 @@ import {
   InternalServerErrorException,
   NestInterceptor,
 } from '@nestjs/common';
-import { Request } from 'express';
+import { Request, Response } from 'express';
 import type { Level } from 'pino';
 import { Observable, throwError } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
 
-import logger from '~/logger';
+import logger, { setTraceId } from '~/logger';
 
 export class RestLoggingInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
     const request = context.switchToHttp().getRequest<Request>();
+    const traceId = setTraceId(request.header('X-Request-Id'));
+    context.switchToHttp().getResponse<Response>().set('X-Request-Id', traceId);
     const params = {
       method: request.method,
       url: request.url,
