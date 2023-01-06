@@ -4,6 +4,7 @@ import { AppService } from '~/services/app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import config from '~/config';
 import { queryLogger } from '~/logger';
+import { AuthenticationController } from '~/controllers/auth.controller';
 
 @Module({
   imports: [
@@ -12,7 +13,7 @@ import { queryLogger } from '~/logger';
       logger: queryLogger
     })
   ],
-  controllers: [AppController],
+  controllers: [AppController, AuthenticationController],
   providers: [AppService]
 })
 export class AppModule {}
